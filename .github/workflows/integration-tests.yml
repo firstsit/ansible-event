@@ -1,4 +1,4 @@
-name: integration tests
+name: Integration tests
 
 on:
   push:
@@ -9,24 +9,28 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    env:
-      EDA_TOKEN: ${{ secrets.EDA_SERVER_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Install Java 
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: "3.9"
 
-      - name: install test requirements
-        run: |
-          export GITHUB_TOKEN=$EDA_TOKEN
-          pip install -r requirements.txt -r test_requirements.txt
+      - name: Install test requirements
+        run: pip install -r requirements.txt -r test_requirements.txt
+        env:
+          PIP_NO_BINARY: jpy
 
-      - name: install collection
+      - name: Install collection
         run: ansible-galaxy collection install .
 
-      - name: run integration tests
+      - name: Run integration tests
         run: pytest tests/integration
